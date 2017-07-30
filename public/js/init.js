@@ -8,6 +8,10 @@ var closeBtn;
 var updateBtn;
 var iClosed = 0;
 var dif = 0;
+var html = '';
+var store,
+closeBTN,
+updateBtn;
 
 request();
 
@@ -35,10 +39,15 @@ function successHandler() {
     setMakePurchase();
 }
 
+function errorHandler() {
+    body.html("Services unavailable");
+}
+
 function populateTemplates() {
     jQuery.each(store.products, function(i, el) {
         appendItem(el);
     });
+    body.append(html);
     body.append(createPurchaseBtn());
 }
 
@@ -65,14 +74,15 @@ function closeItem() {
 }
 
 function setUpdateTotal() {
+    var quantity;
+    var msg;
     updateBtn = $(".c-item__info-submit");
 
     updateBtn.on("click", function(e) {
         e.preventDefault();
 
          index = updateBtn.index(this) + dif;
-        var quantity = $(".c-item__info-quantity").eq(index).val();
-        var msg;
+        quantity = $(".c-item__info-quantity").eq(index).val();
         setTotal(quantity, index);
     });
 }
@@ -86,11 +96,11 @@ function createItemInfoTitle(el) {
         '<div class="c-item__info-title">' +
         '<span class="c-title--info-main">' +
         el.pName +
-        "</span>" +
+        '</span>' +
         ' <span class="c-item__info-number c-title--sub-italic"> Product #' +
         el.id +
-        "</span>" +
-        "</div>"
+        '</span>' +
+        '</div>'
     );
 }
 
@@ -99,27 +109,27 @@ function createItemInfoMain(el) {
         '<div class="c-item__info-main">' +
         '<span class="c-item__info-vehicle"><span class="c-title--sub-straight">Vehicle:</span>' +
         el.vehicle.year +
-        " " +
+        ' ' +
         el.vehicle.make +
-        " " +
+        ' ' +
         el.vehicle.model +
-        " " +
+        ' ' +
         el.vehicle.name +
-        " " +
+        ' ' +
         el.vehicle.option +
-        " " +
+        ' ' +
         el.vehicle.year +
-        " " +
-        "</span>" +
+        ' ' +
+        '</span>' +
         '<div class="l-item__info-description">' +
         '<span class="c-item__info-chars"><span class="c-title--sub-straight">Size/Style:</span>' +
         el.vehicle.sizeChosen +
-        "</span>" +
+        '</span>' +
         '<span class="c-item__info-price c-title--sub-upper">$' +
         el.pPrice +
-        "</span>" +
-        "</div>" +
-        "</div>"
+        '</span>' +
+        '</div>' +
+        '</div>'
     );
 }
 
@@ -130,11 +140,11 @@ function createItemInfoSubmission(el) {
         '<label for="qty" class="c-title--sub-upper">qty:</label>' +
         '<input type="number" name = "qty" id="qty" class="c-item__info-quantity" value="0">' +
         '<input type="submit" value="Update" class="c-item__info-submit c-title--sub-italic">' +
-        "</form>" +
+        '</form>' +
         '<span class="c-item__info-total c-title--sub-upper">Total: $' +
         total +
-        "</span>" +
-        "</div>"
+        '</span>' +
+        '</div>'
     );
 }
 
@@ -144,22 +154,22 @@ function createItemInfo(el) {
         createItemInfoTitle(el) +
         createItemInfoMain(el) +
         createItemInfoSubmission(el) +
-        "</div>"
+        '</div>'
     );
 }
 
 function createItem(el) {
     return (
         '<div class="c-item">' +
-        '   <button class="c-item__close-btn"><i class="fa fa-times" aria-hidden="true"></i></button>' +
+        '<button class="c-item__close-btn"><i class="fa fa-times" aria-hidden="true"></i></button>' +
         createItemImage(el) +
         createItemInfo(el) +
-        "</div>"
+        '</div>'
     );
 }
 
 function appendItem(el) {
-    body.append(createItem(el));
+    html += (createItem(el));
 }
 
 function getImgSrc() {
@@ -180,7 +190,7 @@ function createPurchaseBtn() {
     return (
         '<div class="c-action">' +
         '<button class="c-action__btn"><i class="fa fa-plus" aria-hidden="true"></i> Buy</button>' +
-        "</div>"
+        '</div>'
     );
 }
 
@@ -188,27 +198,29 @@ function createError(msg) {
     return (
         '<div class="c-warning">' +
         '<div class="c-warning__sign"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>' +
-        "</div>" +
+        '</div>' +
         '<div class="c-warning__message">' +
         msg +
-        "</div>" +
-        "</div>"
+        '</div>' +
+        '</div>'
     );
 }
 
 function setMakePurchase() {
     var purchaseButton = $(".c-action__btn");
+
     purchaseButton.on("click", function() {
         console.log("Спасибо за покупку!");
     });
 }
 
 function setTotal(quantity, index) {
+    var currentPrice;
     if (quantity > 0 && quantity < 11) {
-        var currentPrice = store.products[index].pPrice;
+        currentPrice = store.products[index].pPrice;
         total = quantity * currentPrice;
         $(".c-item__info-total").eq(index).html("total:$" + total);
-    } else if (quantity == 0) {
+    } else if (quantity <= 0) {
         msg = "Please set QTY";
         $(".c-item").eq(index).before(createError(msg));
         $(".c-item__info-quantity").eq(index).css("border","1px solid red");
@@ -222,12 +234,10 @@ function setTotal(quantity, index) {
 }
 
 function removeWarning(index) {
+    $(".c-warning").fadeOut();
     setTimeout(function() {
         $(".c-warning").remove();
         $(".c-item__info-quantity").eq(index).css("border","1px solid grey");
     }, 1100);
 }
 
-function errorHandler() {
-    body.html("Services unavailable");
-}
