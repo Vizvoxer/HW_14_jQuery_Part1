@@ -6,6 +6,8 @@ var total = 0;
 var imgSources = [];
 var closeBtn;
 var updateBtn;
+var iClosed = 0;
+var dif = 0;
 
 request();
 
@@ -16,6 +18,9 @@ function request() {
         success: function(data) {
             store = data;
             successHandler();
+        },
+        error:  function() {
+            errorHandler();
         }
     });
 }
@@ -54,6 +59,9 @@ function setItemImage() {
 
 function closeItem() {
     this.closest(".c-item").remove();
+    iClosed =  $(".c-item").length;
+    index = store.products.length;
+    dif = iClosed - index;
 }
 
 function setUpdateTotal() {
@@ -62,7 +70,7 @@ function setUpdateTotal() {
     updateBtn.on("click", function(e) {
         e.preventDefault();
 
-        var index = updateBtn.index(this);
+         index = updateBtn.index(this) + dif;
         var quantity = $(".c-item__info-quantity").eq(index).val();
         var msg;
         setTotal(quantity, index);
@@ -218,4 +226,8 @@ function removeWarning(index) {
         $(".c-warning").remove();
         $(".c-item__info-quantity").eq(index).css("border","1px solid grey");
     }, 1100);
+}
+
+function errorHandler() {
+    body.html("Services unavailable");
 }
